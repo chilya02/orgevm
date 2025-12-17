@@ -39,8 +39,7 @@
     mov ah, 09h
     int 21h
 
-  await:
-    jmp await
+    int 23h
     
     cli 
     push dx
