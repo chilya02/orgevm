@@ -95,6 +95,10 @@ then_branch: # то: res1 = array[8] & array[9]
     sw t6, 0(t0)        # res1 = array[8] & array[9]
     
 end_if:
+    lw s7, res1
+    lw a3, res2
     # Выход из программы
     li a7, 10           # номер системного вызова exit
     ecall
+
+
