@@ -6,7 +6,7 @@ abc:     .word 20 # 434522
 threshold:  .word 100     # пороговое значение
 
 # Массив из 10 элементов
-array:        .space 40     # 10 слов * 4 байта = 40 байт
+array:        .zero 40     # 10 слов * 4 байта = 40 байт
 
 # Результаты
 res1:       .word 0
@@ -59,41 +59,40 @@ init_loop:
     #                             ТО (res1 = arr[8] & arr[9])
     #                             ИНАЧЕ (res2 = arr[1] & c)
     
-    # Загрузка threshold в регистр a6
-    la t1, threshold    # t1 = адрес threshold (сохраняем адрес массива в t0)
-    #lw a6, 0(t1)        # a6 = threshold
-    la a6, threshold
+    # Загрузка threshold в регистр s1
+    lw s1, threshold
     
     # Загрузка нужных элементов массива
-    lw t1, 28(t0)       # t1 = array[7] (базовая адресация: array + 7*4)
-    lw t2, 16(t0)       # t2 = array[4]
-    lw t3, 4(t0)        # t3 = array[1]
+    lw t1, 24(t0)       # t1 = array[7] (базовая адресация: array + 7*4)
+    lw t2, 28(t0)       # t2 = array[4]
+    lw t3, 20(t0)       # t3 = array[1]
     
-    # Вычисление суммы: array[7] + array[4] + array[1]
-    add t4, t1, t2      # t4 = array[7] + array[4]
-    add t4, t4, t3      # t4 = array[7] + array[4] + array[1]
+    # Вычисление суммы: array[6] + array[7] + array[5]
+    add t4, t1, t2      # t4 = array[6] + array[7]
+    add t4, t4, t3      # t4 = array[6] + array[7] + array[5]
     
-    # Проверка условия: если sum <= threshold
-    bge a6, t4, then_branch  # if threshold >= sum
+    # Проверка условия: если sum < threshold
+    blt t4, s1, then_branch  # if sum < threshold
     
-    # иначе: res2 = array[8] | a
-    lw t5, 32(t0)       # t5 = array[8]
-    or t6, t5, s0       # t6 = array[8] | a (регистровая адресация)
+    # иначе: res2 = array[1] & c
+    lw t5, 4(t0)          # t5 = array[1]
+    and t6, t5, s2        # t6 = array[1] & c (регистровая адресация)
     
     # Сохраняем результат в res2
     la t0, res2
-    sw t6, 0(t0)        # res2 = array[8] | a
+    sw t6, 0(t0)        # res2 = array[1] & c
     j end_if
     
-then_branch: # то: res1 = array[5] | array[7]
+then_branch: # то: res1 = array[8] & array[9]
     # Восстанавливаем адрес массива в t5
     la t5, array        # t5 = адрес массива
-    lw t6, 20(t5)       # t6 = array[5]
-    or t6, t6, t1       # t6 = array[5] | array[7]
+    lw t6, 32(t5)       # t6 = array[8]
+    lw t1, 36(t5)       # t1 = array[9]
+    and t6, t6, t1      # t6 = array[8] & array[9]
     
     # Сохраняем результат в res1
     la t0, res1
-    sw t6, 0(t0)        # res1 = array[5] | array[7]
+    sw t6, 0(t0)        # res1 = array[8] & array[9]
     
 end_if:
     # Выход из программы
